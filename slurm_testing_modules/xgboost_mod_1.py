@@ -1,0 +1,233 @@
+
+import xgboost as xgb
+import time
+from our_util import next_seed
+from imblearn.under_sampling import RandomUnderSampler
+import random
+
+def get_features():
+    """
+    returns features from medicare part b data
+    which is everything but the label. the label
+    is in the exclusion column
+    """
+    return [
+        'year',
+        'line_srvc_cnt_sum',
+        'bene_unique_cnt_sum',
+        'bene_day_srvc_cnt_sum',
+        'average_submitted_chrg_amt_sum',
+        'average_medicare_payment_amt_sum',
+        'line_srvc_cnt_mean',
+        'bene_unique_cnt_mean',
+        'bene_day_srvc_cnt_mean',
+        'average_submitted_chrg_amt_mean',
+        'average_medicare_payment_amt_mean',
+        'line_srvc_cnt_median',
+        'bene_unique_cnt_median',
+        'bene_day_srvc_cnt_median',
+        'average_submitted_chrg_amt_median',
+        'average_medicare_payment_amt_median',
+        'line_srvc_cnt_sd',
+        'bene_unique_cnt_sd',
+        'bene_day_srvc_cnt_sd',
+        'average_submitted_chrg_amt_sd',
+        'average_medicare_payment_amt_sd',
+        'line_srvc_cnt_min',
+        'bene_unique_cnt_min',
+        'bene_day_srvc_cnt_min',
+        'average_submitted_chrg_amt_min',
+        'average_medicare_payment_amt_min',
+        'line_srvc_cnt_max',
+        'bene_unique_cnt_max',
+        'bene_day_srvc_cnt_max',
+        'average_submitted_chrg_amt_max',
+        'average_medicare_payment_amt_max',
+        'F',
+        'M',
+        'Addiction Medicine',
+        'Advanced Heart Failure and Transplant Cardiology',
+        'All Other Suppliers',
+        'Allergy/Immunology',
+        'Ambulance Service Supplier',
+        'Ambulatory Surgical Center',
+        'Anesthesiology',
+        'Anesthesiology Assistant',
+        'Audiologist (billing independently)',
+        'Cardiac Electrophysiology',
+        'Cardiac Surgery',
+        'Cardiology',
+        'Centralized Flu',
+        'Certified Clinical Nurse Specialist',
+        'Certified Nurse Midwife',
+        'Chiropractic',
+        'Clinical Laboratory',
+        'Colorectal Surgery (formerly proctology)',
+        'Critical Care (Intensivists)',
+        'CRNA',
+        'Dentist',
+        'Dermatology',
+        'Diagnostic Radiology',
+        'Emergency Medicine',
+        'Endocrinology',
+        'Family Practice',
+        'Gastroenterology',
+        'General Practice',
+        'General Surgery',
+        'Geriatric Medicine',
+        'Geriatric Psychiatry',
+        'Gynecological/Oncology',
+        'Hand Surgery',
+        'Hematology',
+        'Hematology/Oncology',
+        'Hospice and Palliative Care',
+        'Hospitalist',
+        'Independent Diagnostic Testing Facility',
+        'Infectious Disease',
+        'Internal Medicine',
+        'Interventional Cardiology',
+        'Interventional Pain Management',
+        'Interventional Radiology',
+        'Licensed Clinical Social Worker',
+        'Mammographic Screening Center',
+        'Mass Immunizer Roster Biller',
+        'Maxillofacial Surgery',
+        'Medical Oncology',
+        'Medical Toxicology',
+        'Multispecialty Clinic/Group Practice',
+        'Nephrology',
+        'Neurology',
+        'Neuropsychiatry',
+        'Neurosurgery',
+        'Nuclear Medicine',
+        'Nurse Practitioner',
+        'Obstetrics/Gynecology',
+        'Occupational therapist',
+        'Ophthalmology',
+        'Optometry',
+        'Oral Surgery (Dentist only)',
+        'Orthopedic Surgery',
+        'Osteopathic Manipulative Medicine',
+        'Otolaryngology',
+        'Pain Management',
+        'Pathology',
+        'Pediatric Medicine',
+        'Peripheral Vascular Disease',
+        'Pharmacy',
+        'Physical Medicine and Rehabilitation',
+        'Physical Therapist',
+        'Physician Assistant',
+        'Plastic and Reconstructive Surgery',
+        'Podiatry',
+        'Portable X-ray',
+        'Preventive Medicine',
+        'Psychiatry',
+        'Psychologist (billing independently)',
+        'Public Health or Welfare Agency',
+        'Pulmonary Disease',
+        'Radiation Oncology',
+        'Radiation Therapy',
+        'Registered Dietician/Nutrition Professional',
+        'Rheumatology',
+        'Sleep Medicine',
+        'Slide Preparation Facility',
+        'Speech Language Pathologist',
+        'Sports Medicine',
+        'Surgical Oncology',
+        'Thoracic Surgery',
+        'Unknown Physician Specialty Code',
+        'Unknown Supplier/Provider',
+        'Urology',
+        'Vascular Surgery',
+        'Anesthesiologist Assistants',
+        'Clinical Psychologist',
+        'Mass Immunization Roster Biller',
+        'Oral Surgery (dentists only)',
+        'Public Health Welfare Agency'
+    ]
+
+
+def get_label():
+    """
+    returns label for medicare
+    part b data
+    which is just the exclusion column
+    """
+    return ['exclusion']
+
+
+def get_model():
+    """
+    returns model to be used in 
+    run_one... scripts
+    """
+    return xgb.XGBClassifier(tree_method='gpu_hist', objective='binary:logistic',  learning_rate=0.1,
+                              max_depth=6, random_state=next_seed())
+
+def get_exp_name():
+    """
+    returns name of experiment
+    for tracking in analysis
+    """
+    return "XGBoost gpu, max_depth=6, learning_rate=0.1, rus 1-1"
+
+def data_prep(df):
+    """
+    :param df: data frame
+    """
+    df['exclusion'].replace(to_replace=['no', 'yes'], value=[0, 1], inplace=True)
+
+def get_result_file():
+    return "slurm_testing/parallel_experiment_results-{}-{}.json".format(time.strftime('%Y-%m-%d-%H-%M-%S', time.localtime(time.time())), int(random.random()*10000))
+
+def get_max_workers():
+    """
+    return maximum number of concurrent
+    workers for parallel threads
+    """
+    return 1
+
+def get_max_iteration_workers():
+    """
+    return max number of concurrent
+    iteration workers - one iteration
+    is one run of 5-fold cross validation
+    """
+    return 1
+
+def get_max_5_fold_workers():
+    """
+    return max number of 
+    concurrent folds
+    running during 5-fold
+    cross validation
+    more than 5 would not make sense
+    """
+    return 1
+
+
+def get_last_fitted_model_path():
+    """
+    return location of last fitted model
+    """
+    return f"fitted_models/{get_exp_name()}.pkl".replace(" ","_").replace(",", "_")
+
+def get_sampler():
+    """
+    return sampling object
+    """
+    return RandomUnderSampler(sampling_strategy=1.0, random_state=next_seed())
+
+def get_slurm_options():
+    """
+    returns slurm options for running experiment
+    """
+    return ["--gres=gpu:1", "--mem-per-cpu=96gb", "--mem-per-gpu=32gb", "-p", "longq7-mri"]
+
+def get_input_file_name():
+    """
+    input file name for experiment
+    """
+    full_file= '/home/groups/fau-bigdata-datasets/medicare/part-b/20190813_NPI-level_2012_to_2017_Medicare_PartB_aggregated_with_LEIE_one-hot_encoding.csv'
+    sample = '/home/jhancoc4/medicare-data/sample_part_b_2012_2017.csv'
+    return sample
