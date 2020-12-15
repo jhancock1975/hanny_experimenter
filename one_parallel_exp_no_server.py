@@ -158,23 +158,6 @@ def check_for_results(file_name: str, result_file_parent_dir: str, logger: objec
         logger.debug("we will run the experiment again.")
     return False
 
-def check_running_now(module_name: str, logger: object)->bool:
-    """
-    checks if module is not currently running
-    :param module_name: experiment module name
-    :return: true if module already submitted to slurm queue for my user id
-    """
-    running_jobs=subprocess.run(['squeue', '-u', 'jhancoc4', '-o', '"%k"', '-h'],
-                                                           capture_output=True)
-    s_out=str(running_jobs.stdout)
-    if module_name in s_out:
-        logger.debug("experiment %s apparently already running in %s,", module_name, s_out)
-        logger.debug("not running %s again at this time", module_name)
-        return True
-    else:
-        return False
-
-
 df = None
 # make features and label global
 # so threads don't pass around copies
@@ -199,7 +182,7 @@ if __name__ == "__main__":
     
 
     # load experiment parameters module 
-    file_path = args.module_name
+    file_path = args.module_name.strip()
     module_name = file_path[0:file_path.rfind('.')]
 
     spec = importlib.util.spec_from_file_location(module_name, file_path)
@@ -213,9 +196,6 @@ if __name__ == "__main__":
     path = Path(result_file_name)
     result_file_parent_dir=path.parent
     already_done = check_for_results(file_path, result_file_parent_dir, logger)
-    # check if an experiment is not already running
-    # may fail later and we would have to run again
-    # running_now = check_running_now(module_name, logger)
     if not already_done:
         #only do the experiment if we do not have results
         logger.debug("We have not yet conducted experiment %s.  We commence to perform it now.",
