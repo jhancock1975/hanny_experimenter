@@ -1,2 +1,2 @@
 # slurm_experimenter
-scripts for running machine learning scripts in slurm
+scripts for running machine learning experiments in slurm
