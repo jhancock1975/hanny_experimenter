@@ -84,11 +84,11 @@ write_hsd_table <- function(aov_clf_metric, agg, metric, label, caption){
 ### param label - latex label for table
 ### para caption - latex caption for table
 ### return string of latex code for a table
-    end_row = "\\\\ \\hline\n"
-    result = "\\bgroup\n"
-    result = paste(result, "\\begin{table}[H]\n")
-    result = paste(result, "\\centering\n")
-    result = paste(result, "\t\\begin{tabular}{l}\\hline\n")
+    end_row <- "\\\\ \\hline\n"
+    result <- "\\bgroup\n"
+    result <- paste(result, "\\begin{table}[H]\n")
+    result <- paste(result, "\\centering\n")
+    result <- paste(result, "\t\\begin{tabular}{l}\\hline\n")
     i <- 1
     for (level in agg[[1]]){
         result = paste(result, "\tGroup", level, "consists of:",
@@ -112,7 +112,28 @@ englishify <- function(v){
     s <- str_replace(s, ",", "dna ")
     return(stri_reverse(s))
 }
-    
+
+make_level_dict <- function(agg){
+### make a dictionary of factor names
+### to numbers for coloring HSD plots
+    i <- 1
+    group_numbers <- c()
+    level_names <-c()
+    group_labels <- c()
+    for (group_label in agg[[1]]) {
+        for (group_members in agg[[2]][i]) {
+            group_numbers <- c(rep(i, length(group_members)), group_numbers)
+            group_labels <- c(rep(group_label, length(group_members)), group_labels)
+            level_names <- c(group_members, level_names)
+            }
+        i <- i + 1
+    }
+    result <- data.frame(group_numbers = group_numbers,
+                         level_names = level_names,
+                         group_labels = group_labels)
+    ii <- order(result$group_labels)
+    return(result[ii,])
+}
 n_factor_research_question <- function(question_name, factors, metric, factor_funcs,
                                              input_file_name, output_file_name, make_boxplots = F){
 ### function to do ANOVA and HSD Test for n factors, no interaction
@@ -145,7 +166,7 @@ n_factor_research_question <- function(question_name, factors, metric, factor_fu
     
     aov_factor_metric <- aov(factor_metric_model, data=df)
     aov_table <-xtable(aov_factor_metric, caption = paste("ANOVA for", englishify(factors),
-                               "as  factors of performance in terms of", proper_form(metric)
+                               "as factors of performance in terms of", proper_form(metric)
                                )
                        )
     aov_table_str <- print(aov_table, file = "/dev/null")
@@ -155,9 +176,11 @@ n_factor_research_question <- function(question_name, factors, metric, factor_fu
         hsd_res <- HSD.test(aov_factor_metric, factor, alpha=0.01, console=F, group=T)
 ### print hsd groups for treatments/factors
         agg <- aggregate(rownames(hsd_res$groups) ~ hsd_res$groups$groups, hsd_res$groups, paste)
+### make dictionary of factors to numbers for colors
+        hsd_factor_dict <- make_level_dict(agg)
         write(write_hsd_table(aov_clf_metric, agg, metric,
                               paste0('hsd-', factor, '-', metric ),
-                              paste('Tukey HSD test groupings after ANOVA of',
+                              paste('HSD test groupings after ANOVA of',
                                     proper_form(metric), 'with', factor, 'as a factor'
                                     )
                               ),
@@ -165,13 +188,14 @@ n_factor_research_question <- function(question_name, factors, metric, factor_fu
               append=T
               )
         if (make_boxplots == T) {
-            plot_title <- paste("Mean", plotting_form(metric), "for levels of", factor)
+            plot_title <- paste(question_name, ": Mean", plotting_form(metric), "for levels of",
+                                factor)
             png_file_name <- draw_boxplots(df[[metric]] ~ df[[factor]], df, factor,
-                                           plotting_form(metric), 2, plot_title)
+                                           plotting_form(metric), 2, plot_title, hsd_factor_dict)
             fig <- "\n\\begin{figure}[H]\n"
             fig <- paste0(fig, "\t\\caption{Boxplots of mean ", proper_form(metric),
                           " for levels of ", factor)
-            fig <- paste0(fig, "}\n")
+            fig <- paste0(fig, "; HSD group printed below box; color corresponds to HSD group}\n")
             fig <- paste0(fig, "\t\\includegraphics[width=\\linewidth]{", png_file_name, "}\n")
             fig <- paste0(fig, "\t\\label{fig:", png_file_name, "}\n")
             fig <- paste0(fig, "\\end{figure}\n")
@@ -191,15 +215,65 @@ plotting_form <- function(s){
     }
 }
 
-draw_boxplots <- function(f, x, xlab, ylab, las, main){
+
+## Transparent colors
+## Mark Gardener 2015
+## https://www.dataanalytics.org.uk/make-transparent-colors-in-r/
+
+t_col <- function(color, percent = 50, name = NULL) {
+                                        #      color = color name
+                                        #    percent = % transparency
+                                        #       name = an optional name for the color
+
+    ## Get RGB values for named color
+    rgb.val <- col2rgb(color)
+
+    ## Make new color using input color as base and alpha set by transparency
+    t.col <- rgb(rgb.val[1], rgb.val[2], rgb.val[3],
+                 max = 255,
+                 alpha = percent * 255 / 100,
+                 names = name)
+
+    return(t.col)
+}
+
+draw_boxplots <- function(f, x, xlab, ylab, las, main, hsd_factor_dict){
 ### generates box plots of experiment results per factor
 ### in the future we want  Tukey HSD groups on boxes
 ### return: name of file generated
-    png_file_name <-   paste0(gsub('_','-', gsub(',','', gsub(' ', '-',  tolower(main)))), ".png")
+    png_file_name <-   paste0(gsub(":", "-",
+                                   gsub('_','-',
+                                        gsub(',','',
+                                             gsub(' ', '-',  tolower(main))))),
+                              ".png")
     png( png_file_name )
     par(mar=c(10.5, 4.1, 4.1, 2.1))
-    boxplot(f, data = x, las = las, xlab = "", ylab = ylab, main = main)
+    levels <- as.character(unique(x[[xlab]]))
+    n_colors <- length(unique(hsd_factor_dict$group_labels))
+    color_pallet <- unlist(lapply(rainbow(n_colors), function(x) t_col(x, 10)))
+    color_list <- c()
+    boxplot_label_list <- c()
+    for (level in levels) {
+        color_list <- c(color_pallet[
+            subset(hsd_factor_dict, level_names == level)$group_numbers],
+            color_list)
+        boxplot_label_list <-
+            c(as.vector(subset(hsd_factor_dict, level_names == level)$group_labels),
+              boxplot_label_list)
+    }
+
+
+    bxp <- boxplot(f, data = x, las = las, xlab = "", ylab = ylab, main = main, col = color_list)
+
+    level_colors <- c()
+    for (i in unique(hsd_factor_dict$group_numbers)) {
+        level_colors <- c(level_colors, color_pallet[i])
+    }
     mtext(xlab, side = 1, line = 9)
+
+    # draw hsd group number over box plots
+    text(c(1 : length(hsd_factor_dict$level_names)) , bxp$stats[3, ] + 0.01,
+                 boxplot_label_list)
     dev.off()
     return(png_file_name)
 }
