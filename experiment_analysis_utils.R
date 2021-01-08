@@ -1,7 +1,7 @@
 ### jsonlite for parsing json
 ### agricolae for Tukey HSD
 ### xtable for latex format ANOVA table
-pacman::p_load(agricolae, gplots, multcompView, ggplot2, jsonlite, xtable, stringr, stringi)
+pacman::p_load(agricolae, gplots, multcompView, ggplot2, jsonlite, xtable, stringr, stringi, gtools)
 
 get_data_for_n_factor_research_question <- function(file_name, factor_funcs,
                                                     factor_names){
@@ -195,7 +195,7 @@ n_factor_research_question <- function(question_name, factors, metric, factor_fu
             fig <- "\n\\begin{figure}[H]\n"
             fig <- paste0(fig, "\t\\caption{Boxplots of mean ", proper_form(metric),
                           " for levels of ", factor)
-            fig <- paste0(fig, "; HSD group printed below box; color corresponds to HSD group}\n")
+            fig <- paste0(fig, "; HSD group printed on box; color corresponds to HSD group}\n")
             fig <- paste0(fig, "\t\\includegraphics[width=\\linewidth]{", png_file_name, "}\n")
             fig <- paste0(fig, "\t\\label{fig:", png_file_name, "}\n")
             fig <- paste0(fig, "\\end{figure}\n")
@@ -253,26 +253,23 @@ draw_boxplots <- function(f, x, xlab, ylab, las, main, hsd_factor_dict){
     color_pallet <- unlist(lapply(rainbow(n_colors), function(x) t_col(x, 10)))
     color_list <- c()
     boxplot_label_list <- c()
+    levels <- mixedsort(levels)
     for (level in levels) {
-        color_list <- c(color_pallet[
-            subset(hsd_factor_dict, level_names == level)$group_numbers],
-            color_list)
+        color_list <- c(color_list, color_pallet[
+            subset(hsd_factor_dict, level_names == level)$group_numbers])
         boxplot_label_list <-
-            c(as.vector(subset(hsd_factor_dict, level_names == level)$group_labels),
-              boxplot_label_list)
+            c(boxplot_label_list,
+              as.vector(subset(hsd_factor_dict, level_names == level)$group_labels))
     }
 
+    bxp <- boxplot(f, data = x, las = las, xlab = "", ylab = ylab, main = main, col = color_list,
+                   lex.order=T)
 
-    bxp <- boxplot(f, data = x, las = las, xlab = "", ylab = ylab, main = main, col = color_list)
-
-    level_colors <- c()
-    for (i in unique(hsd_factor_dict$group_numbers)) {
-        level_colors <- c(level_colors, color_pallet[i])
-    }
+    # classifier names under boxes
     mtext(xlab, side = 1, line = 9)
 
     # draw hsd group number over box plots
-    text(c(1 : length(hsd_factor_dict$level_names)) , bxp$stats[3, ] + 0.01,
+    text(c(1 : length(hsd_factor_dict$level_names)) , bxp$stats[3, ] + 0.5 * (bxp$stats[4, ] - bxp$stats[3, ]),
                  boxplot_label_list)
     dev.off()
     return(png_file_name)
