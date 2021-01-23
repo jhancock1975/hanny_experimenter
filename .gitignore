@@ -127,3 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# ignore test output
+slurm_exp_test_results/
+slurm_exp_test_fitted_model/

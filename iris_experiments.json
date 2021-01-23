@@ -1,0 +1,59 @@
+[
+  {
+    "name": "Random_Forest_iris_smote_1_1_all",
+    "features": [
+	"sepal_length",
+	"sepal_width",
+	"petal_length",
+	"petal_width"
+    ],
+    "label": "is_setosa",
+    "model": {
+      "module name": "sklearn.ensemble",
+      "class name": "RandomForestClassifier",
+      "instance params": {
+        "bootstrap": false,
+        "ccp_alpha": 0.0,
+        "class_weight": "balanced_subsample",
+        "criterion": "gini",
+        "max_depth": 4,
+        "max_features": "sqrt",
+        "max_leaf_nodes": null,
+        "max_samples": null,
+        "min_impurity_decrease": 0.0005,
+        "min_impurity_split": null,
+        "min_samples_leaf": 3,
+        "min_samples_split": 5,
+        "min_weight_fraction_leaf": 0.0,
+        "n_estimators": 260,
+        "n_jobs": -1,
+        "oob_score": false,
+        "random_state": 1729,
+        "verbose": 0,
+        "warm_start": false
+      }
+    },
+    "result file": "/home/jhancoc4/slurm_exp_test_results/Random_Forest_iris_smote_1_1_all.json",
+    "max workers": 1,
+    "max iteration workers": 1,
+    "max 5 fold workers": 1,
+    "last fitted model path": "/home/jhancoc4/slurm_exp_test_fitted_model/",
+    "sampler": {
+      "module name": "imblearn.under_sampling",
+      "class name": "RandomUnderSampler",
+      "instance params": {
+        "sampling_strategy": 1.0,
+        "random_state": 1729
+      }
+    },
+    "slurm options": [
+      "-p",
+      "longq7-mri"
+    ],
+    "input file": {
+	"name": "/home/jhancoc4/git/slurm_experimenter/iris_binary.csv",
+      "comment": "binary class derived from iris data with is_setosa target that is 1 if species is Setosa and 0 otherwise, for testing sampling technique",
+      "separator": ","
+    }
+  }
+]
