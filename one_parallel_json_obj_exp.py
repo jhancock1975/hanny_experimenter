@@ -31,7 +31,7 @@ import json
 from pathlib import Path
 import re
 import subprocess
-
+from scipy.stats import randint, uniform, loguniform
 class ExpRunner(object):
     """
     runs one experiment
@@ -70,31 +70,17 @@ class ExpRunner(object):
         if sampler:
             X_sample, y_sample =  sampler.fit_resample(ExpRunner.X.loc[train_index], ExpRunner.y.values[train_index])
         model_obj.fit(X_sample, y_sample)
-
-        best_model_params = None
-        if hasattr(model_obj, "best_model") and callable(model.best_model):
-            # assume its a hyperpopt model
-            best_model_params = json.loads(model_obj.best_model())
-        elif hasattr(model_obj, "best_estimator_"):
-            # assume its a GridSearchCV object
-            best_model_params = model_obj.best_estimator
-            
-        ExpRunner.last_fitted_model = model_obj
+        results = {}
         exp_name = experiment_params_module.exp_name
         logger.debug('starting predict %s for cross validation fold %d', exp_name, fold)
         y_pred = model_obj.predict(ExpRunner.X.loc[test_index])
         y_prob = model_obj.predict_proba(ExpRunner.X.loc[test_index])
         logger.debug('complete %s cross validation fold %d', exp_name, fold)
-        if best_model_params:
-            return {f'{fold}':
-                {'results':
-                 get_metrics_dict(ExpRunner.y.values[test_index], y_pred, logger,  y_prob),
-                 'best_params': best_model_params
-                }
-            }
-        else:
-            return {f'{fold}':
-                get_metrics_dict(ExpRunner.y.values[test_index], y_pred, logger,  y_prob)}
+        d = get_metrics_dict(ExpRunner.y.values[test_index], y_pred, logger,  y_prob)
+        if hasattr(model_obj, 'best_estimator_'):
+            d['best_params_'] = model_obj.best_params_
+        return {f'{fold}': d}
+
 
     def do_5_fold_cv(self, experiment_params_module: object, logger:object)->object:
         """
@@ -126,7 +112,7 @@ class ExpRunner(object):
                 fold += 1
         return results
 
-    def do_model_exp(self, experiment_json,  experiment_params_module, logger:object)->object:
+    def do_model_exp(self, experiment_dict,  experiment_params_module, logger:object)->object:
         """
         do ten iterations of 5-fold cross validation
         :param experiment_params_module: has parameters for experiment
@@ -139,7 +125,6 @@ class ExpRunner(object):
         model_base_name = experiment_params_module.exp_name
         results = {
             model_base_name : {
-                'params': experiment_json,
                 'results_data': {}
             }
         }
@@ -178,9 +163,16 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     logger.debug("args %s", str(args))
-    with open(args.file_name, 'r') as f:
-        experiment_json = json.loads(f.read())
-        experiment = experiment_json[args.experiment_name]
+    if args.file_name.endswith('.json'):
+        with open(args.file_name, 'r') as f:
+            experiment_dict = json.loads(f.read())
+    elif args.file_name.endswith('.pkl'):
+        with open(args.file_name, 'rb') as f:
+            experiment_dict = pickle.load(f)
+    else:
+        logger.error('unsupported file type')
+        exit(1)
+    experiment = experiment_dict[args.experiment_name]
     
 
     # load experiment parameters module 
@@ -213,23 +205,11 @@ if __name__ == "__main__":
     # run experiments and save resuts to dictionary
 
     try:
-        with open(result_file_name, 'w') as f:
-            f.write(
-                json.dumps(
-                    exp_runner.do_model_exp(
-                        experiment_json[experiment_params_module.exp_name],
+        results_d = exp_runner.do_model_exp(experiment_dict[experiment_params_module.exp_name],
                         experiment_params_module,
-                        logger),
-                    indent=2
-                )
-            )
+                        logger)
+        with open(result_file_name, 'w') as f:
+            f.write(json.dumps(results_d, indent=2))
     except Exception as e:
         logger.debug('caught exception %s', str(e))
         traceback.print_exc()
-
-    # save last trained model
-    trained_model_file = experiment_params_module.last_fitted_model_path
-    if trained_model_file:
-        create_parent_dir_if_not_exists(trained_model_file)
-        with open(trained_model_file, 'wb') as f:
-            pickle.dump(ExpRunner.last_fitted_model, f, pickle.HIGHEST_PROTOCOL)
