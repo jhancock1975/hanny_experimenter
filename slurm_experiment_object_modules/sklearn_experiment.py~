@@ -1,0 +1,100 @@
+import time
+from our_util import next_seed, get_logger
+import random
+
+class SklearnExperment(object):
+        # parent of sklearn experiment objects
+
+    def get_features():
+        """
+        returns features from medicare part b data
+        which is everything but the label. the label
+        is in the exclusion column
+        """
+        raise NotImplementedError("Please define a get_features() function that returns a list of strings representing the input values for a supervised machine learning algorithm")
+   
+
+    def get_label():
+        """
+        returns label for medicare
+        part b data
+        which is just the exclusion column
+        """
+        raise NotImplementedError("Please define a get_label() function that returns a one element array with the name of the label on the dataset.  This will be used as the ground truth for a supervised machine learning algorithm")
+
+
+    def get_model():
+        """
+        returns model to be used in 
+        run_one... scripts
+        """
+        raise NotImplementedError("Please define a get_model() function that returns an instance of a classifier for supervised machine learning, For example: xboost.XGBClassifier(), with at least the required parameters.")
+    
+    def get_exp_name():
+        """
+        returns name of experiment
+        for tracking in analysis
+        """
+        raise NotImplementedError("Please give a human readable name for this experiment.")
+
+    def data_prep(df: pd.DataFrame)->pd.DataFrame:
+        """
+        :param df: data frame
+        """
+        raise NotImplementedError("Please define a function data_prep(data_frame_obj) for any data preparation necesssary prior to experment, or simply return data_frame_obj unchanged if no pre-processing is necessary")
+
+    def get_result_file():
+        """
+        :return: name of file to save experiment results
+        """
+        raise NotImplementedError("Please define a function that returns the name of the file where we should store results.")
+
+    def get_max_workers():
+        """
+        return maximum number of concurrent
+        workers for parallel threads for running experiments
+        """
+        1
+
+    def get_max_iteration_workers():
+        """
+        return max number of concurrent
+        iteration workers - one iteration
+        is one run of 5-fold cross validation
+        """
+        return 1
+
+    def get_max_5_fold_workers():
+        """
+        return max number of 
+        concurrent folds
+        running during 5-fold
+        cross validation
+        more than 5 would not make sense
+        """
+        return 1
+
+
+    def get_last_fitted_model_path():
+        """
+        return location of last fitted model
+        """
+        return f"fitted_models/{get_exp_name()}.pkl".replace(" ","_").replace(",", "_")
+
+    def get_sampler():
+        """
+        return sampling object
+        """
+        return RandomUnderSampler(sampling_strategy=1.0, random_state=next_seed())
+
+    def get_slurm_options():
+        """
+        returns slurm options for running experiment
+        """
+        raise NotImplementedError('Please define a get_slurm_options() function that gives the command line options for the sbatch command for running this experiment.  Every option should be one or two elements of a list.  If it is an option that is set with an = operator, then it should be one element.  If it is an optoin that is not set wtih the = operator, then it should be two elements.  Here is an example: return ["--gres=gpu:1", "--mem-per-cpu=96gb", "--mem-per-gpu=32gb", "-p", "longq7-mri"]')
+
+    def get_input_file_name():
+        """
+        input file name for experiment
+        """
+        raise NotImplementeError("Please define a function that returns the name of the input file for the experiment.")

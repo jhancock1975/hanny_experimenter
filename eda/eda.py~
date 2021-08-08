@@ -1,0 +1,53 @@
+#!/bin/env python
+import logging
+import sys
+sys.path.append("../util")
+from our_util import get_logger
+import argparse
+import pandas as pd
+from sklearn.model_selection import train_test_split
+import os
+
+class EdaMeister(object):
+
+    def stratified_sample_csv(self, df: pd.DataFrame, col: str, n_samples: int, output_file_name: str):
+        """
+        from https://stackoverflow.com/a/53615691
+        save stratified sample from a dataframe
+        :param df: big dataframe take a sample of it
+        :param col: name of column to use for stratified sample
+        :param n_samples: number of samples to save
+        :param output_file_name: name of file to save stratified sample
+        :return: dataframe with stratified sample, side-effect saving sample to dataframe
+        """
+        n = min(n_samples, df[col].value_counts().min())
+        df_ = df.groupby(col).apply(lambda x: x.sample(n))
+        df_.index = df_.index.droplevel(0)
+        df_.to_csv(output_file_name, index=False)
+        return _df
+
+    def get_descriptive_stats_str(self, df: pd.DataFrame):
+        stats_df = df.describe(include="all")
+        stats_report = ''
+        pd.set_option('display.max_rows', None)
+        pd.set_option('display.max_columns', None)
+        pd.set_option('display.width', None)
+        pd.set_option('display.max_colwidth', -1)
+        for c in stats_df.columns:
+            stats_report.append(f"\n{stats_df[c]}")
+        return stats_report
+    
+if __name__ == "__main__":
+    eda_meister = EdaMeister()
+    parser  = argparse.ArgumentParser('get descriptive statistics')
+    parser.add_argument('-i', '--input_file_name', help='input file name')
+    args = parser.parse_args()
+    input_file_name = args.input_file_name
+    logger = get_logger(logger_name='get_descriptive_stats', level=logging.INFO)
+    logger.debug(f"reading input file {input_file_name}")
+    df = pd.read_csv(input_file_name)
+    logger.debug('taking stratified sample')
+    sample_file_name = f'{os.path.parent(input_file_name)}{os.pathsep}sample_{os.path.basename(input_file_name)}'
+    eda_meister.stratified_sample_csv(df, 'subcategory', 25000, sample_file_name)
+    #stats_report = eda_meister.get_descriptive_stats_str(df)
+    #logger.info(stats_report)

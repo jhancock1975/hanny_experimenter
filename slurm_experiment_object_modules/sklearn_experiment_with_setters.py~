@@ -8,7 +8,7 @@ import importlib
 class SklearnExperimentContainer(object):
         # parent of sklearn experiment objects
 
-    def __init__(self, name:str, experiment: object)->None:
+    def __init__(self, experiment: object)->None:
         """
         constructor, sets properties
         :param experiment: dictionary of experiment parameters
@@ -16,19 +16,16 @@ class SklearnExperimentContainer(object):
         self._features = experiment['features']
         self._label = experiment['label']
         self._model = self.load_module(experiment['model'])
-        self._exp_name = name
+        self._exp_name = experiment['name']
         self._result_file = experiment['result file']
-        if 'in progress file' in experiment:
-            self._in_progress_file_name = experiment['in progress file']
         self._max_workers = experiment['max workers']
         self._max_iteration_workers = experiment['max iteration workers']
         self._max_5_fold_workers = experiment['max 5 fold workers']
+        self._last_fitted_model_path = experiment['last fitted model path']
         self._sampler = self.load_module(experiment['sampler'])
         self._slurm_options = experiment['slurm options']
         self._input_file_name = experiment['input file']['name']
         self._separator = experiment['input file']['separator']
-        if 'scaler' in experiment:
-            self._scaler = experiment['scaler']
 
     def load_module(self, module_dict: object)->object:
         """
@@ -37,33 +34,15 @@ class SklearnExperimentContainer(object):
         :param module_dict: should contain entries for module name, class name, and class instance parameters in a sub-dictionary
         :return: instance of class     
         """
-        if module_dict:        
-            class_ = self._get_obj( module_dict)
-            if (module_dict['instance params']):
-                if 'model' in module_dict['instance params']:
-                    # for cases like randomized search and grid search hyper parameter tuning
-                    # we recursivley instantiate module
-                    mod = self.load_module(module_dict['instance params']['model'])
-                    module_dict['instance params']['estimator'] = mod
-                return class_( **module_dict['instance params'])
-            else:
-                return  class_()
-        else:
-            return None
-        
-    def _get_obj(self, module_dict:object)->object:
-        """
-        for the "do not repeat yourself (DRY) principle, return object
-        given class name and module name
-        :param module_name: path to file e.g. scipy.stats
-        :param class_name: class name e.g. RandomForestClassifier
-        :return object constructor function
-        """
+        print(json.dumps(module_dict, indent=2))
         module_path = module_dict['module name']
         class_name = module_dict['class name']
         module = importlib.import_module(module_path)
-        return getattr(module, class_name)
-        
+        class_ = getattr(module, class_name)
+        instance = class_()
+        instance.set_params(** module_dict['instance params'])
+        return  instance
+            
     @property
     def features(self):
         """
@@ -76,18 +55,6 @@ class SklearnExperimentContainer(object):
     @features.setter
     def features(self, features):
         self._featuers = features
-
-    @property
-    def scaler(self):
-        """
-        returns features  scaler
-        so far looks like min/max scaler is all we need
-        """
-        return self._scaler
-   
-    @scaler.setter
-    def scaler(self, features):
-        self._scaler = scaler
     
     @property
     def label(self):
@@ -126,20 +93,11 @@ class SklearnExperimentContainer(object):
     def exp_name(self, exp_name):
         self._exp_name = exp_name
 
-    def data_prep(self, df: pd.DataFrame, experiment_params)->pd.DataFrame:
+    def data_prep(self, df: pd.DataFrame)->pd.DataFrame:
         """
-        check if there is a data_prep function defined for the
-        experiment and apply it to the dataframe if possible
         :param df: data frame
         """
-        try:
-            prep_fn = experiment_params['data_prep']
-            if prep_fn:
-                return prep_fn(df)
-            else:
-                return df
-        except KeyError as e:
-            return df
+        return df
 
     @property
     def result_file(self):
@@ -151,18 +109,6 @@ class SklearnExperimentContainer(object):
     @result_file.setter
     def result_file(self, result_file):
         self._result_file = result_file
-
-
-    @property
-    def in_progress_file_name(self):
-        """
-        :return: name of file to save experiment results
-        """
-        return self._in_progress_file_name
-
-    @in_progress_file_name.setter
-    def in_progress_file(self, in_progress_file_name):
-        self._in_progress_file_name = in_progress_file_name
 
     @property
     def max_workers(self):
@@ -203,6 +149,18 @@ class SklearnExperimentContainer(object):
     @max_5_fold_workers.setter
     def max_5_fold_workers(self, max_5_fold_workers):
         self._max_5_fold_workers = max_5_fold_workers
+
+
+    @property
+    def last_fitted_model_path(self):
+        """
+        return location of last fitted model
+        """
+        return f"fitted_models/{self.exp_name}.pkl".replace(" ","_").replace(",", "_")
+
+    @last_fitted_model_path.setter
+    def last_fitted_model_path(self, last_fitted_model_path):
+        self._last_fitted_model_path  = last_fitted_model_path
 
     @property
     def sampler(self):
