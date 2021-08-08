@@ -1,12 +1,19 @@
 #!/home/jhancoc4/venv/py-3.8.7/bin/python
 # this script distributes jobs round-robin style to all ndoes in a list
 # good for up to medium sized data
+# batcher.py uses run_exp for managing jobs
+#
+# set SLEX_HOME to be the directory that contains the
+# slurm_experimenter source code
 import sys
 import os
 import subprocess
 import argparse
 import json
 # we *want* that to throw a key error if the n_jobs environment variable is not set
+# one_parallel_with_resume.py does some of its own multithreading; however,
+# we will remove all that, let it run sequentially and have multithreading
+# in libraries
 n_jobs=os.environ['n_jobs']
 
 def run_exp(exp_name, pickle_file_name, node_name, ram=None):
@@ -30,7 +37,7 @@ def run_exp(exp_name, pickle_file_name, node_name, ram=None):
                     f'--mem=',
                     '-p',
                     'longq7-mri',
-                    '/home/jhancoc4/git/spring-2021-research/one_parallel_with_resume.py',
+                    f'{os.environ["SLEX_HOME"]}/one_parallel_with_resume.py',
                     '-f'
                     f'{pickle_file_name}',
                     '-e',
