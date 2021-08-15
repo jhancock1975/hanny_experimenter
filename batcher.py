@@ -48,9 +48,13 @@ def filter_not_done(exp_list, inclusion_list, exclusion_list):
     res = []
     if   inclusion_list and len(inclusion_list) > 0 and  exclusion_list and len(exclusion_list) > 0:
         for e in exp_list:
+            has_all_terms = True
             for i in inclusion_list:
-                if i in e:
-                    res.append(e)
+                if i not in e:
+                    has_all_terms = False
+            if has_all_terms == True:
+                res.append(e)
+                    
         # have to use deep copy otherwise get infinite loop
         exp_list = copy.deepcopy(res)
         for e in exp_list:
