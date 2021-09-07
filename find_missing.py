@@ -27,9 +27,10 @@ def find_missing(pickle_file, results_dir):
     for exp_name in d.keys():
         found = False
         for r_name in os.listdir(results_dir):
-            if r_name.startswith(exp_name):
-                    found = True
-                    break
+            # experiment name should equal file name without .json
+            if r_name[:-5] == exp_name:
+                found = True
+                break
         for r_name in running_jobs:
             if r_name.startswith(exp_name):
                 found = True

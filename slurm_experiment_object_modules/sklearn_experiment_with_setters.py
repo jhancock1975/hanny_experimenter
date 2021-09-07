@@ -132,13 +132,13 @@ class SklearnExperimentContainer(object):
         experiment and apply it to the dataframe if possible
         :param df: data frame
         """
-        try:
+        if 'data_prep' in experiment_params:
             prep_fn = experiment_params['data_prep']
             if prep_fn:
                 return prep_fn(df)
             else:
                 return df
-        except KeyError as e:
+        else:
             return df
 
     @property

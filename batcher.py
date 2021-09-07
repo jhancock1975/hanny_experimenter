@@ -46,7 +46,7 @@ def filter_not_done(exp_list, inclusion_list, exclusion_list):
     :reeturn: filtered list
     """
     res = []
-    if   inclusion_list and len(inclusion_list) > 0 and  exclusion_list and len(exclusion_list) > 0:
+    if inclusion_list and len(inclusion_list) > 0 and exclusion_list and len(exclusion_list) > 0:
         for e in exp_list:
             has_all_terms = True
             for i in inclusion_list:
@@ -63,7 +63,7 @@ def filter_not_done(exp_list, inclusion_list, exclusion_list):
                     res.remove(e)
         return res
     
-    elif  inclusion_list and len(inclusion_list) > 0:
+    elif inclusion_list and len(inclusion_list) > 0:
         for e in exp_list:
             for i in inclusion_list:
                 if i in e:

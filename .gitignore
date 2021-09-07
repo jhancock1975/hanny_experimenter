@@ -2,8 +2,8 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
 # C extensions
+
 *.so
 
 # Distribution / packaging
@@ -131,3 +131,5 @@ dmypy.json
 # ignore test output
 slurm_exp_test_results/
 slurm_exp_test_fitted_model/
+
+.idea/

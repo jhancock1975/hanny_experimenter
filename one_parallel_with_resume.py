@@ -86,7 +86,6 @@ class ExpRunner(object):
                 X_sample = scaler.fit_transform(X_sample)
         else:
             scaler = None
-
         model_obj.fit(X_sample, y_sample)
         results = {}
         exp_name = experiment_params_module.exp_name
@@ -238,9 +237,9 @@ if __name__ == "__main__":
         ExpRunner.df = pd.read_csv(exp_input_file, sep=separator)
     logger.debug('complete reading input file')
 
-    ExpRunner.X = ExpRunner.df[experiment_params_module.features]
     logger.debug('start data prep')
-    ExpRunner.X = experiment_params_module.data_prep(ExpRunner.X, experiment)
+    ExpRunner.df = experiment_params_module.data_prep(ExpRunner.df, experiment)
+    ExpRunner.X = ExpRunner.df[experiment_params_module.features]
     gc.collect()
     ExpRunner.y = ExpRunner.df[experiment_params_module.label]
 
