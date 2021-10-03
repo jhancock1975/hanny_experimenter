@@ -10,6 +10,7 @@ import os
 import subprocess
 import argparse
 import json
+import dill as pickle
 # we *want* that to throw a key error if the n_jobs environment variable is not set
 # one_parallel_with_resume.py does some of its own multithreading; however,
 # we will remove all that, let it run sequentially and have multithreading
@@ -28,20 +29,25 @@ def run_exp(exp_name, pickle_file_name, node_name, ram=None):
         ram = '164G'
     if not os.path.isdir('./logs'):
         os.makedirs('./logs')
-    command = subprocess.run(['sbatch',
+    with open(pickle_file_name, 'rb') as f:
+        exp_dict = pickle.loads(f.read())[exp_name]
+    sub_proc_arr = ['sbatch',
                     f'--nodelist={node_name}',
                     '-o' , f'./logs/{exp_name}.log',
                     '--comment',
                     exp_name,
                     f'--cpus-per-task={n_jobs}',
-                    f'--mem=',
-                    '-p',
+                    f'--mem={ram}']
+    if len(exp_dict['slurm options']) > 0:
+        sub_proc_arr.append(exp_dict['slurm options'])
+    sub_proc_arr += ['-p',
                     'longq7-mri',
                     f'{os.environ["SLEX_HOME"]}/one_parallel_with_resume.py',
                     '-f'
                     f'{pickle_file_name}',
                     '-e',
-                    exp_name], capture_output=True)
+                    exp_name]
+    command = subprocess.run(sub_proc_arr, capture_output=True)
     return json.dumps( {'stdout': command.stdout.decode('utf8'),
                         'stderr': command.stderr.decode('utf8')},
                        indent=2)

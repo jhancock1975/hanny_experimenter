@@ -32,7 +32,7 @@ def find_missing(pickle_file, results_dir):
                 found = True
                 break
         for r_name in running_jobs:
-            if r_name.startswith(exp_name):
+            if r_name == exp_name:
                 found = True
                 break
         if not found:
