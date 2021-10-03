@@ -99,7 +99,7 @@ if __name__ == "__main__":
     logger.info(f'starting up with arguments {vars(args)}')
     # this controls how often the script wakes up
     # to check for available nodes
-    interval = 10
+    interval = 1
     not_done = find_missing(args.pickle_file, args.results_dir)
     done = len(not_done) <= 0
     complete_msg = 'All experiments are complete.'
@@ -119,6 +119,8 @@ if __name__ == "__main__":
                 cmd_out_str = run_exp(exp_name, args.pickle_file, node_name=node, ram='164G')
                 logmsg = f"Output of sbatch command for running experiment {exp_name}:\n{cmd_out_str}"
                 logger.info(logmsg)
+                remaining_jobs = "\n".join(not_done)
+                logger.info(f'remaining jobs:\n {remaining_jobs}')
         time.sleep(interval)
         not_done = find_missing(args.pickle_file, args.results_dir)
     logger.info(complete_msg)
