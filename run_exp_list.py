@@ -38,7 +38,7 @@ def run_exp(exp_name, pickle_file_name, node_name, ram=None):
                     exp_name,
                     f'--cpus-per-task={n_jobs}',
                     f'--mem={ram}']
-    if len(exp_dict['slurm options']) > 0:
+    if exp_dict['slurm options'] and len(exp_dict['slurm options']) > 0:
         sub_proc_arr.append(exp_dict['slurm options'])
     sub_proc_arr += ['-p',
                     'longq7-mri',
