@@ -11,22 +11,23 @@ import subprocess
 import argparse
 import json
 import dill as pickle
-# we *want* that to throw a key error if the n_jobs environment variable is not set
-# one_parallel_with_resume.py does some of its own multithreading; however,
-# we will remove all that, let it run sequentially and have multithreading
-# in libraries
-n_jobs=os.environ['n_jobs']
 
-def run_exp(exp_name, pickle_file_name, node_name, ram=None):
+def run_exp(exp_name, pickle_file_name, node_name, mode=None):
     """
     runs experiment with sbatch command
     TODO: how to handle requested ram?  move to exp def?
     :param exp_name: name of experiment, should be key to experiment in pickled dictionary in file
     named args.pickle_file_name
     """
-    if not ram:
-        # "Go big or go home'
-        ram = '164G'
+    if not mode:
+        mode = 'parallel'
+    elif mode == 'p':
+        mode = 'parallel'
+    elif mode == 's':
+        mode = 'sequential'
+    else:
+        mode = 'parallel'
+        
     if not os.path.isdir('./logs'):
         os.makedirs('./logs')
     with open(pickle_file_name, 'rb') as f:
@@ -35,14 +36,12 @@ def run_exp(exp_name, pickle_file_name, node_name, ram=None):
                     f'--nodelist={node_name}',
                     '-o' , f'./logs/{exp_name}.log',
                     '--comment',
-                    exp_name,
-                    f'--cpus-per-task={n_jobs}',
-                    f'--mem={ram}']
+                    exp_name]
     if exp_dict['slurm options'] and len(exp_dict['slurm options']) > 0:
         sub_proc_arr.append(exp_dict['slurm options'])
     sub_proc_arr += ['-p',
                     'longq7-mri',
-                    f'{os.environ["SLEX_HOME"]}/one_parallel_with_resume.py',
+                    f'{os.environ["SLEX_HOME"]}/one_{mode}_with_resume.py',
                     '-f'
                     f'{pickle_file_name}',
                     '-e',
@@ -73,4 +72,4 @@ if __name__ == "__main__":
     i = 0
     for exp_name in exp_names:
         i += 1
-        run_exp(exp_name, args.pickle_file_name, node_name=nodes[i % len(nodes)], ram='164G')
+        run_exp(exp_name, args.pickle_file_name, node_name=nodes[i % len(nodes)])

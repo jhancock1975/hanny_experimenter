@@ -257,3 +257,22 @@ def get_feature_selection_experiments(feature_selection_file_name, selected_feat
                     
 
     return fs_experiments
+
+def add_non_dp_experiments(experiments, result_dir, partial_dir):
+    """
+    :param datasets_dict: dictionary of datasets
+    we are removing dport from all experiments and 
+    re-running for comparison
+    :return: dictionary with experiments, destination port removed
+    """
+    result = {}
+    for exp_name, exp_obj in experiments.items():
+        if 'dport' in exp_obj['features']:
+            new_exp_name = exp_name + '_no_dp'
+            new_exp_obj = copy.deepcopy(exp_obj)
+            new_exp_obj['features'].remove('dport')
+            new_exp_obj['slurm options'] = "--mem=164G"
+            new_exp_obj['result file'] = f'{result_dir}/{new_exp_name}.json'
+            new_exp_obj['in progress file'] = f'{partial_dir}/{new_exp_name}.json'
+            result[new_exp_name] = new_exp_obj
+    return result

@@ -95,11 +95,13 @@ if __name__ == "__main__":
     parser.add_argument('--exclusion_list', '-e', nargs='+',
                         help='list of keywords experiment names must not have',
                         default=None, required=False)
+    parser.add_argument('--mode', '-m', default=None, required=False,
+                        help='mode s or p for sequential or parallel (multithreaded)')
     args = parser.parse_args()
     logger.info(f'starting up with arguments {vars(args)}')
     # this controls how often the script wakes up
     # to check for available nodes
-    interval = 1
+    interval = 30
     not_done = find_missing(args.pickle_file, args.results_dir)
     done = len(not_done) <= 0
     complete_msg = 'All experiments are complete.'
@@ -116,7 +118,7 @@ if __name__ == "__main__":
             if len(not_done) == 0:
                 done = True
             for exp_name, node in zip(not_done, available_nodes):
-                cmd_out_str = run_exp(exp_name, args.pickle_file, node_name=node, ram='164G')
+                cmd_out_str = run_exp(exp_name, args.pickle_file, node_name=node, mode=args.mode)
                 logmsg = f"Output of sbatch command for running experiment {exp_name}:\n{cmd_out_str}"
                 logger.info(logmsg)
                 remaining_jobs = "\n".join(not_done)
