@@ -27,7 +27,7 @@ def get_available_nodes():
     queries slurm for nodes in use
     then returns list of nodes not in use
     """
-    sub_proc_arr = ["squeue", "-h", "-u", "jhancoc4", "-o", "%N"]
+    sub_proc_arr = ["squeue", "-h", "-u", "jhancoc4", "-o", "%n"]
     sub_proc_out = subprocess.run(sub_proc_arr, capture_output=True)
     nodes_in_use = sub_proc_out.stdout.decode('utf8').strip().split('\n')
     available_nodes = [n for n in nodes if n not in nodes_in_use]
