@@ -49,6 +49,8 @@ def get_clf(s):
         return 'CatBoost'
     elif 'dt' in s:
         return 'DT'
+    elif 'lgb' in s:
+        return 'LightGBM'
     elif 'lightgbm' in s:
         return 'LightGBM'
     elif  'lr' in s:

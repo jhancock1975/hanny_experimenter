@@ -73,11 +73,12 @@ def acc_from_cm(cm: object)->float:
     tn = cm[1][1]
     return (tp + tn)/(tp + tn + fp + fn)
 
-def format_number(x):
+def format_number(x, use_sn):
     """
     return in LaTeX scientific notation if very small or very close
     to one
     :param x: number to format
+    :param use_sn: use scientific notation
     :return: string
     """
     # caught this issue formatting
@@ -86,12 +87,13 @@ def format_number(x):
     def py_sci_to_latex(x):
         arr = x.split("E")
         return f'${arr[0]} \\times 10^{{{arr[1]}}}$'
-    if (x < 1E-5):
+    if (x < 1E-5) and use_sn:
         return py_sci_to_latex(f'{x:.5E}')
     else:
         return f'{round(x, 5):.5f}'
 
-def cross_validation_results_table(results_dict: object, metrics_list: object, exp_title=None, shorten_func=None, exp_subtitle=None, long_exp_names=False)->None:
+def cross_validation_results_table(results_dict: object, metrics_list: object, exp_title=None, shorten_func=None,
+                                   exp_subtitle=None, long_exp_names=False, use_sn=False)->None:
     """
     print mean values of results_dict
     in LaTeX format
@@ -130,7 +132,7 @@ def cross_validation_results_table(results_dict: object, metrics_list: object, e
         table_str += '\\\\ \\midrule\n'
         # compute mean values of metrics and put them
         # on rows
-        for file_name in results_files:
+        for file_name in sorted(results_files):
             with open(file_name, 'r') as f:
                 j = json.loads(f.read())
             metrics_dict = {}
@@ -147,10 +149,10 @@ def cross_validation_results_table(results_dict: object, metrics_list: object, e
                                 metrics_dict[metric].append(fold_data[metric])
                 if len(metrics_dict[metric]) != 50:
                     # something is not right if we get more than 50 measurements in a file
-                    raise Exception(f'found results with more than 50 measurements in {file_name}')
+                    raise Exception(f'found results with more than 50 measurements in {file_name}, experiment {exp_name}')
                 table_str += f'\t\t{space_underscores(shorten_func(exp_name))}'
                 for metric in metrics_list:
-                    table_str +=  f'& {format_number(np.mean(metrics_dict[metric]))} & {format_number(np.std(metrics_dict[metric]))}'
+                    table_str +=  f'& {format_number(np.mean(metrics_dict[metric]), use_sn=False)} & {format_number(np.std(metrics_dict[metric]), use_sn=False)}'
                 table_str += '\\\\ \\midrule\n'
 
         table_str += '\t\\end{tabular}\n'

@@ -141,6 +141,15 @@ make_level_dict <- function(agg){
     ii <- order(result$group_labels)
     return(result[ii,])
 }
+end_anova_caption <- function(factors){
+    print (paste('length of factors', length(factors)))
+    if (length(factors) > 1){
+        return("as factors of performance in terms of")
+    } else {
+        return ("as a factor of performance in terms of")
+    }
+}
+
 n_factor_research_question <- function(question_name, factors, metric, factor_funcs,
                                        input_file_name, output_file_name, make_boxplots = F,
                                        interactions = 1, add_hsd_groups = T, y_limits_vector=c(0, 1.1), hsd_alpha=0.01){
@@ -164,7 +173,6 @@ n_factor_research_question <- function(question_name, factors, metric, factor_fu
         file = output_file_name,
         append = T
     )
-    
     df <- get_data_for_n_factor_research_question(input_file_name, factor_funcs, factors)
     if (interactions > 1) {
         formula_str <- paste0("(", paste0(factors, collapse = " + ") ,")^", interactions)
@@ -174,8 +182,8 @@ n_factor_research_question <- function(question_name, factors, metric, factor_fu
     print(metric)
     factor_metric_model <- lm(paste(metric, "~", formula_str), data = df)
     aov_factor_metric <- aov(factor_metric_model, data=df)
-    aov_table <-xtable(aov_factor_metric, caption = paste("ANOVA for", englishify(factors),
-                               "as factors of performance in terms of", proper_form(metric)
+    aov_table <-xtable(aov_factor_metric, caption = paste("ANOVA for the number of", englishify(factors),
+                               end_anova_caption(factors), proper_form(metric)
                                )
                        )
     aov_table_str <- print(aov_table, file = "/dev/null", caption.placement = "top")
@@ -185,11 +193,11 @@ n_factor_research_question <- function(question_name, factors, metric, factor_fu
     write(aov_table_str, file = output_file_name, append = T)
 
     for (factor in factors){
-        write(
-            paste0("\n Analysis for the ", factor, " Factor\n\n"),
-            file = output_file_name,
-            append = T
-    )
+  #      write(
+  #          paste0("\n Analysis for the ", factor, " Factor\n\n"),
+  #          file = output_file_name,
+  #          append = T
+  #  )
         
 
         hsd_res <- HSD.test(aov_factor_metric, factor, alpha=hsd_alpha, console=F, group=T)

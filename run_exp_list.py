@@ -46,6 +46,7 @@ def run_exp(exp_name, pickle_file_name, node_name, mode=None):
                     f'{pickle_file_name}',
                     '-e',
                     exp_name]
+
     command = subprocess.run(sub_proc_arr, capture_output=True)
     return json.dumps( {'stdout': command.stdout.decode('utf8'),
                         'stderr': command.stderr.decode('utf8')},
