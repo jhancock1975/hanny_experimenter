@@ -29,7 +29,7 @@ if __name__ == '__main__':
     
     while True:
         nodes_in_use = get_node_list()
-        logger.ifno(f'nodes_in_use {nodes_in_use}')
+        logger.info(f'nodes_in_use {nodes_in_use}')
         time.sleep(10)
 
     
