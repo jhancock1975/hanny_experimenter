@@ -70,7 +70,7 @@ if __name__ == '__main__':
         available_nodes = all_nodes.difference(nodes_in_use)
         logger.debug(f'available_nodes {available_nodes}')
         if len(available_nodes) > 0:
-            run_next_job(available_nodes, args.script_file)
+            run_next_job(available_nodes, args.script_file, logger)
         time.sleep(10)
 
     
