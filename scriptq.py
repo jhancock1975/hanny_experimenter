@@ -16,12 +16,13 @@ def get_node_list():
     # stdout is a bytes array, we convert to a string, then split on newline to
     # get a list of nodes currently in use
     # split gives an empty element after last node name because it is followed by a newline
+    node_list = set(subprocess.run(['squeue','-h', '--me', '-o', '%N'],
+                               capture_output=True).stdout.decode('utf-8').split('\n')[:-1]
+                    )
     # we never want to run anything on nodegpu002 and nodegpu003, they are too wimpy
     # so assume they are in use
-    return set(subprocess.run(['squeue','-h', '--me', '-o', '%N'],
-                               capture_output=True).stdout.decode('utf-8').split('\n')[:-1]
-                   ).update(['nodegpu002', 'nodegpu003'])
-
+    node_list.update(['nodegpu002', 'nodegpu003'])
+    return node_list
 
     return 
 if __name__ == '__main__':
