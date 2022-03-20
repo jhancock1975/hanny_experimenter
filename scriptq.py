@@ -37,6 +37,10 @@ def run_next_job(available_nodes, script_file, logger):
         cmd = f.readline()
     cmd = cmd.format(node=available_nodes[0])
     logger.info(f'running command: {cmd}')
+    # subrprocess.run whatever fiddle-faddle it does
+    # in turning the array passed to it to a comand
+    # is too complicated to reconcile with complex sbatch command
+    # so use os.system
     os.system(cmd)
     # remove first line from file
     with open(script_file, 'r') as fin:
