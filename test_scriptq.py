@@ -3,4 +3,4 @@
 # it is s python script that will
 # run for 10 minutes
 import time
-time.sleep(600)
+time.sleep(240)
