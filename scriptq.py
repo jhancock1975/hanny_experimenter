@@ -16,16 +16,17 @@ def get_node_list():
     # stdout is a bytes array, we convert to a string, then split on newline to
     # get a list of nodes currently in use
     # split gives an empty element after last node name because it is followed by a newline
-    node_list = subprocess.run(['squeue','-h', '--me', '-o', '%N'],
+    node_set = subprocess.run(['squeue','-h', '--me', '-o', '%N'],
                                capture_output=True).stdout.decode('utf-8').split('\n')[:-1]
-    logger.info(f'node_list = {node_list}')
+    logger.info(f'node_set = {node_set}')
     return node_list
 
     return 
 if __name__ == '__main__':
     logger.info('staring up')
+    def 
     while True:
-        node_list = get_node_list()
+        nodes_in_use = get_node_list()
         time.sleep(10)
 
     
