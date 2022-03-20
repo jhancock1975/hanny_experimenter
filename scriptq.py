@@ -62,7 +62,7 @@ if __name__ == '__main__':
 
     # node names in Koko are mostly like nodenviv1000
     # foolowed by the node number with a leading 0
-    all_nodes = set([f'nodenviv1000{"0" if node_num > 10 else ""}{node_num}'
+    all_nodes = set([f'nodenviv1000{"0" if node_num < 10 else ""}{node_num}'
                      for node_num in range(1, 17)])
     # two nodes do not fit the pattern of other node names
     all_nodes.update(['nodegpu002', 'nodegpu003'])
