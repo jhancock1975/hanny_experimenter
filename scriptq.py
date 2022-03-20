@@ -44,18 +44,23 @@ def run_next_job(available_nodes, script_file, logger):
     with open(script_file, 'r') as f:
         cmd = f.readline()
     cmd = cmd.format(node=list(available_nodes)[0])
-    logger.info(f'running command: {cmd}')
-    # subrprocess.run whatever fiddle-faddle it does
-    # in turning the array passed to it to a comand
-    # is too complicated to reconcile with complex sbatch command
-    # so use os.system
-    os.system(cmd)
-    # remove first line from file
-    with open(script_file, 'r') as fin:
-        data = fin.read().splitlines(True)
-    with open(script_file, 'w') as fout:
-        fout.writelines(data[1:])
-    pass
+    if len(cmd.strip()) > 0:
+        logger.info(f'running command: {cmd}')
+        # subrprocess.run whatever fiddle-faddle it does
+        # in turning the array passed to it to a comand
+        # is too complicated to reconcile with complex sbatch command
+        # so use os.system
+        os.system(cmd)
+            # remove first line from file
+        with open(script_file, 'r') as fin:
+            data = fin.read().splitlines(True)
+        with open(script_file, 'w') as fout:
+            fout.writelines(data[1:])
+        result = True
+    else:
+        logger.info('empty line found, no command to execute')
+        result = False
+    return result
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -73,13 +78,14 @@ if __name__ == '__main__':
                      for node_num in range(1, 17)])
     # two nodes do not fit the pattern of other node names
     all_nodes.update(['nodegpu002', 'nodegpu003'])
-    while True:
+    more_jobs = True
+    while more_jobs:
         nodes_in_use = get_node_list()
         logger.debug(f'nodes in use {nodes_in_use}')
         available_nodes = all_nodes.difference(nodes_in_use)
         logger.debug(f'available_nodes {available_nodes}')
         if len(available_nodes) > 0:
-            run_next_job(available_nodes, args.script_file, logger)
+            more_jobs = run_next_job(available_nodes, args.script_file, logger)
         time.sleep(10)
 
     
