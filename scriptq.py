@@ -86,6 +86,8 @@ if __name__ == '__main__':
         logger.debug(f'available_nodes {available_nodes}')
         if len(available_nodes) > 0:
             more_jobs = run_next_job(available_nodes, args.script_file, logger)
+        else:
+            logger.debug('no nodes available')
         time.sleep(10)
 
     
