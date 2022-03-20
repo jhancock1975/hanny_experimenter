@@ -75,6 +75,7 @@ if __name__ == '__main__':
     all_nodes.update(['nodegpu002', 'nodegpu003'])
     while True:
         nodes_in_use = get_node_list()
+        logger.debug(f'nodes in use {nodes_in_use}')
         available_nodes = all_nodes.difference(nodes_in_use)
         logger.debug(f'available_nodes {available_nodes}')
         if len(available_nodes) > 0:

@@ -1,0 +1,16 @@
+sbatch -p longq7-mri --nodelist={node} /mnt/beegfs/home/jhancoc4/git/slurm_experimenter/test_scriptq.py
+sbatch -p longq7-mri --nodelist={node} /mnt/beegfs/home/jhancoc4/git/slurm_experimenter/test_scriptq.py
+sbatch -p longq7-mri --nodelist={node} /mnt/beegfs/home/jhancoc4/git/slurm_experimenter/test_scriptq.py
+sbatch -p longq7-mri --nodelist={node} /mnt/beegfs/home/jhancoc4/git/slurm_experimenter/test_scriptq.py
+sbatch -p longq7-mri --nodelist={node} /mnt/beegfs/home/jhancoc4/git/slurm_experimenter/test_scriptq.py
+sbatch -p longq7-mri --nodelist={node} /mnt/beegfs/home/jhancoc4/git/slurm_experimenter/test_scriptq.py
+sbatch -p longq7-mri --nodelist={node} /mnt/beegfs/home/jhancoc4/git/slurm_experimenter/test_scriptq.py
+sbatch -p longq7-mri --nodelist={node} /mnt/beegfs/home/jhancoc4/git/slurm_experimenter/test_scriptq.py
+sbatch -p longq7-mri --nodelist={node} /mnt/beegfs/home/jhancoc4/git/slurm_experimenter/test_scriptq.py
+sbatch -p longq7-mri --nodelist={node} /mnt/beegfs/home/jhancoc4/git/slurm_experimenter/test_scriptq.py
+sbatch -p longq7-mri --nodelist={node} /mnt/beegfs/home/jhancoc4/git/slurm_experimenter/test_scriptq.py
+sbatch -p longq7-mri --nodelist={node} /mnt/beegfs/home/jhancoc4/git/slurm_experimenter/test_scriptq.py
+sbatch -p longq7-mri --nodelist={node} /mnt/beegfs/home/jhancoc4/git/slurm_experimenter/test_scriptq.py
+sbatch -p longq7-mri --nodelist={node} /mnt/beegfs/home/jhancoc4/git/slurm_experimenter/test_scriptq.py
+sbatch -p longq7-mri --nodelist={node} /mnt/beegfs/home/jhancoc4/git/slurm_experimenter/test_scriptq.py
+sbatch -p longq7-mri --nodelist={node} /mnt/beegfs/home/jhancoc4/git/slurm_experimenter/test_scriptq.py
