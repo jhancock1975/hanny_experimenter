@@ -19,7 +19,7 @@ def get_node_list():
     # split gives an empty element after last node name because it is followed by a newline
     # in squeue command %n gives nodes in use, %N gives nodes requested
     node_list = subprocess.run(['squeue','-h', '--me', '-o', '%N %n'],
-                               capture_output=True).stdout.decode('utf-8').split('\n')[:-1]
+                               capture_output=True).stdout.decode('utf-8').split()[:-1]
     # need to remove whitespace surrounding node names
     node_list = list(map(lambda s: s.strip(), node_list))
     # conver to a set to make it easy to
