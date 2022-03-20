@@ -6,6 +6,6 @@ from our_util import get_logger
 if __name__ == '__main__':
     logger = get_logger()
     # output of subprocess is a CompletedProcess object
-    cp = subprocess.run(['squeue','-h', '--me', '-o', '%N'], capture_outupt=True)
+    cp = subprocess.run(['squeue','-h', '--me', '-o', '%N'], capture_output=True)
     logger.debug(f'cp.stdout = {cp.stdout}')
     
