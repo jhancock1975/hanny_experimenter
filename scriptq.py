@@ -21,7 +21,7 @@ def get_node_list():
     node_list = set(subprocess.run(['squeue','-h', '--me', '-o', '%N %n'],
                                capture_output=True).stdout.decode('utf-8').split('\n')[:-1])
     # need to remove whitespace surrounding node names
-    node_list = list(map(strip, node_list))
+    node_list = list(map(lambda s: s.strip(), node_list))
     # we never want to run anything on nodegpu002 and nodegpu003, they are too wimpy
     # so assume they are in use
     # add other nodes to be ignored here
