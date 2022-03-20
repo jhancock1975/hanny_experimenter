@@ -27,10 +27,12 @@ def get_node_list():
     return 
 if __name__ == '__main__':
     logger.info('staring up')
-    
+    all_nodes = set([f'nodenviv1000{"0" if node_num > 10 else ""}{node_num}'
+                     for node_num in range(1, 17)])
     while True:
         nodes_in_use = get_node_list()
         logger.info(f'nodes_in_use {nodes_in_use}')
+        logger.info(f'all_nodes {all_nodes}')
         time.sleep(10)
 
     
