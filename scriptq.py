@@ -5,6 +5,7 @@ import time
 from our_util import get_logger
 import argparse
 import shutil
+import os
 
 def get_node_list():
     '''
