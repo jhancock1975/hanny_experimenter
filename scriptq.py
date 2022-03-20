@@ -35,7 +35,7 @@ def run_next_job(available_nodes, script_file, logger):
     # value for nodelist, which will be the node that the job runs on
     with open(script_file, 'r') as f:
         cmd = f.readline()
-    cmd = cmd.format(node=available_nodes[0])
+    cmd = cmd.format(node=list(available_nodes)[0])
     logger.info(f'running command: {cmd}')
     # subrprocess.run whatever fiddle-faddle it does
     # in turning the array passed to it to a comand
