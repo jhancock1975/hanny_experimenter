@@ -12,16 +12,19 @@ def get_node_list():
     get list of nodes currently in use
     :return: list of node names that current user is running jobs on
     '''
-    #  output of subprocess is a CompletedProcess object
+    # output of subprocess is a CompletedProcess object
     # which has a stdout member when capture_output equals True
     # stdout is a bytes array, we convert to a string, then split on newline to
     # get a list of nodes currently in use
     # split gives an empty element after last node name because it is followed by a newline
     # in squeue command %n gives nodes in use, %N gives nodes requested
-    node_list = set(subprocess.run(['squeue','-h', '--me', '-o', '%N %n'],
-                               capture_output=True).stdout.decode('utf-8').split('\n')[:-1])
+    node_list = subprocess.run(['squeue','-h', '--me', '-o', '%N %n'],
+                               capture_output=True).stdout.decode('utf-8').split('\n')[:-1]
     # need to remove whitespace surrounding node names
     node_list = list(map(lambda s: s.strip(), node_list))
+    # conver to a set to make it easy to
+    # get available nodes later
+    node_list = set(node_list)
     # we never want to run anything on nodegpu002 and nodegpu003, they are too wimpy
     # so assume they are in use
     # add other nodes to be ignored here
