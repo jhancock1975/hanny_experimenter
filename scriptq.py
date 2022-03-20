@@ -3,8 +3,7 @@ import subprocess
 import logging
 import time
 from our_util import get_logger
-
-logger = get_logger()
+import argparse
 
 def get_node_list():
     '''
@@ -26,6 +25,10 @@ def get_node_list():
 
     return 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-v', '--verbose', dest='verbose', action='store_true')
+    args = parser.parse_args()
+    logger = get_logger(level=logging.DEBUG if args.verbose else logging.INFO)
     logger.info('staring up')
     # node names in Koko are mostly like nodenviv1000
     # foolowed by the node number with a leading 0
@@ -36,7 +39,8 @@ if __name__ == '__main__':
     while True:
         nodes_in_use = get_node_list()
         available_nodes = all_nodes.difference(nodes_in_use)
-        logger.info(f'available_nodes {available_nodes}')
+        logger.info('test')
+        logger.debug(f'available_nodes {available_nodes}')
         time.sleep(10)
 
     
