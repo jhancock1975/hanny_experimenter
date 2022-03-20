@@ -17,10 +17,14 @@ def get_node_list():
     # stdout is a bytes array, we convert to a string, then split on newline to
     # get a list of nodes currently in use
     # split gives an empty element after last node name because it is followed by a newline
-    node_list = set(subprocess.run(['squeue','-h', '--me', '-o', '%N'],
+    # in squeue command %n gives nodes in use, %N gives nodes requested
+    node_list = set(subprocess.run(['squeue','-h', '--me', '-o', '%N %n'],
                                capture_output=True).stdout.decode('utf-8').split('\n')[:-1])
+    # need to remove whitespace surrounding node names
+    node_list = list(map(strip, node_list))
     # we never want to run anything on nodegpu002 and nodegpu003, they are too wimpy
     # so assume they are in use
+    # add other nodes to be ignored here
     node_list.update(['nodegpu002', 'nodegpu003'])
     return node_list
 
