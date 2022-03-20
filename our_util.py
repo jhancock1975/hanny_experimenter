@@ -258,6 +258,26 @@ def get_feature_selection_experiments(feature_selection_file_name, selected_feat
 
     return fs_experiments
 
+def get_slurm_options(model_name):
+    if ('mlp__' in model_name):
+        return "--mem=164G  --cpus-per-task=16"
+    if 'encoded__' in model_name and 'theft' in model_name:
+        return "--gres=gpu:4"
+    if ('catboost' in model_name or 'cb' in model_name):
+        return "--gres=gpu:4"
+    else:
+        return "--mem=164G"
+
+def get_n_jobs(model_name):
+    if ('mlp__' in model_name):
+        return 16
+    if 'encoded__' in model_name:
+        return 1
+    if ('catboost' in model_name or 'cb' in model_name):
+        return 1
+    else:
+        return 2
+
 def add_non_dp_experiments(experiments, result_dir, partial_dir):
     """
     :param datasets_dict: dictionary of datasets
@@ -271,7 +291,7 @@ def add_non_dp_experiments(experiments, result_dir, partial_dir):
             new_exp_name = exp_name + '_no_dp'
             new_exp_obj = copy.deepcopy(exp_obj)
             new_exp_obj['features'].remove('dport')
-            new_exp_obj['slurm options'] = "--mem=164G"
+            new_exp_obj['slurm options'] = get_slurm_options(exp_name)
             new_exp_obj['result file'] = f'{result_dir}/{new_exp_name}.json'
             new_exp_obj['in progress file'] = f'{partial_dir}/{new_exp_name}.json'
             result[new_exp_name] = new_exp_obj
