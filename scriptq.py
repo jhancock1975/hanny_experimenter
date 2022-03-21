@@ -28,7 +28,9 @@ def get_node_list():
     # we never want to run anything on nodegpu002 and nodegpu003, they are too wimpy
     # so assume they are in use
     # add other nodes to be ignored here
-    node_list.update(['nodegpu002', 'nodegpu003'])
+    # temporarily adding '05 and '15 because anything I submit does not run
+    # and squeue report "resource unavailable"
+    node_list.update(['nodegpu002', 'nodegpu003','nodenviv100015', 'nodenviv100005'])
     return node_list
 
 def run_next_job(available_nodes, script_file, logger):
