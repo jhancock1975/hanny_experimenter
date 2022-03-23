@@ -30,7 +30,7 @@ def get_node_list():
     # add other nodes to be ignored here
     # temporarily adding '05 and '15 because anything I submit does not run
     # and squeue report "resource unavailable"
-    node_list.update(['nodegpu002', 'nodegpu003','nodenviv100015', 'nodenviv100005'])
+    node_list.update(['nodegpu002', 'nodegpu003'])
     return node_list
 
 def run_next_job(available_nodes, script_file, logger):
