@@ -150,14 +150,17 @@ end_anova_caption <- function(factors){
     }
 }
 
-n_factor_research_question <- function(question_name, factors, metric, factor_funcs,
+
+n_factor_research_question <- function(exp_title, factors, metric, factor_funcs,
                                        input_file_name, output_file_name, make_boxplots = F,
-                                       interactions = 1, add_hsd_groups = T, y_limits_vector=c(0, 1.1), hsd_alpha=0.01){
+                                       interactions = 1, add_hsd_groups = T,
+                                       y_limits_vector=c(0, 1.1), hsd_alpha=0.01, format="json"){
 ### function to do ANOVA and HSD Test for n factors, no interaction
 ### :param question name: name of research question, usually Q1, Q2, etc.
 ### :param factors: list of treatment under anlysis
 ### :param metric: response analyized, for example area under precision recall curve
 ### :param factor_funcs: functions that returns level of factor, derived from experiment name
+### :param format: 'json' or 'csv' experiment output file format
 ### in experiment results json file
 ### input_file_name: name of file containing experiment data, should be a file with a specific JSON
 ### format
@@ -169,11 +172,20 @@ n_factor_research_question <- function(question_name, factors, metric, factor_fu
     )
 
     write(
-        paste0("\\subsection{Analysis of Results in Terms of ", proper_form(metric), "}\n"),
+        paste0("\\subsection{", exp_title, " Analysis of Results in Terms of ",
+               proper_form(metric), "}\n"),
         file = output_file_name,
         append = T
     )
-    df <- get_data_for_n_factor_research_question(input_file_name, factor_funcs, factors)
+    
+    if (format == 'json'){
+        df <- get_data_for_n_factor_research_question(input_file_name, factor_funcs, factors)
+    } else if (format == 'csv'){
+        df <- read.csv(input_file_name)
+    } else {
+        stop('error unrecognized file format')
+    }
+        
     if (interactions > 1) {
         formula_str <- paste0("(", paste0(factors, collapse = " + ") ,")^", interactions)
     } else {
@@ -182,7 +194,7 @@ n_factor_research_question <- function(question_name, factors, metric, factor_fu
     print(metric)
     factor_metric_model <- lm(paste(metric, "~", formula_str), data = df)
     aov_factor_metric <- aov(factor_metric_model, data=df)
-    aov_table <-xtable(aov_factor_metric, caption = paste("ANOVA for the number of", englishify(factors),
+    aov_table <-xtable(aov_factor_metric, caption = paste("ANOVA for", englishify(factors),
                                end_anova_caption(factors), proper_form(metric)
                                )
                        )
