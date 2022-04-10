@@ -77,7 +77,7 @@ def get_nodes_in_queue(queue: str)->set :
         # return cpu nodes in longq7-eng, only one
         # gpu node in longq7-eng now, so no need for
         # scriptq
-        all_nodes = set([f'nodeamd0{i}' for i in range(17,39)])
+        all_nodes = set(['nodeamd025', 'nodeamd027', 'nodeamd029', 'nodeamd030', 'nodeamd031', 'nodeamd032', 'nodeamd033', 'nodeamd034', 'nodeamd036', 'nodeamd037'])
     else:
         raise Exception('unknown queue')
     return all_nodes
@@ -96,7 +96,7 @@ if __name__ == '__main__':
 
     # node names in Koko are mostly like nodenviv1000
     # foolowed by the node number with a leading 0
-    all_nodes = get_nodes_in_queue(queue) 
+    all_nodes = get_nodes_in_queue(args.queue) 
     # two nodes do not fit the pattern of other node names
     all_nodes.update(['nodegpu002', 'nodegpu003'])
     more_jobs = True
