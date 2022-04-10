@@ -172,7 +172,7 @@ n_factor_research_question <- function(exp_title, factors, metric, factor_funcs,
     )
 
     write(
-        paste0("\\subsection{", exp_title, " Analysis of Results in Terms of ",
+        paste0("\\subsection*{", exp_title, " Analysis of Results in Terms of ",
                proper_form(metric), "}\n"),
         file = output_file_name,
         append = T
@@ -210,7 +210,6 @@ n_factor_research_question <- function(exp_title, factors, metric, factor_funcs,
   #          file = output_file_name,
   #          append = T
   #  )
-        
 
         hsd_res <- HSD.test(aov_factor_metric, factor, alpha=hsd_alpha, console=F, group=T)
 ### print hsd groups for treatments/factors

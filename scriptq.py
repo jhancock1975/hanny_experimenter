@@ -64,10 +64,29 @@ def run_next_job(available_nodes, script_file, logger):
         result = False
     return result
 
+def get_nodes_in_queue(queue: str)->set :
+    '''
+    based on name of queue, return names of nodes to use
+    :param queue: name of queue to use, longq7-mri or longq7-eng
+    :return: set of nodes to used
+    '''
+    if queue == 'longq7-mri':
+        all_nodes = set([f'nodenviv1000{"0" if node_num < 10 else ""}{node_num}'
+                     for node_num in range(1, 17)])
+    elif queue == 'longq7-eng':
+        # return cpu nodes in longq7-eng, only one
+        # gpu node in longq7-eng now, so no need for
+        # scriptq
+        all_nodes = set([f'nodeamd0{i}' for i in range(17,39)])
+    else:
+        raise Exception('unknown queue')
+    return all_nodes
+    
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-v', '--verbose', dest='verbose', action='store_true',
                         help='turn on debugging output')
+    parser.add_argument('queue', help='queue to submit jobs to')
     parser.add_argument('script_file', help='file of commands to run via the sbatch utility') 
     args = parser.parse_args()
     
@@ -76,8 +95,7 @@ if __name__ == '__main__':
 
     # node names in Koko are mostly like nodenviv1000
     # foolowed by the node number with a leading 0
-    all_nodes = set([f'nodenviv1000{"0" if node_num < 10 else ""}{node_num}'
-                     for node_num in range(1, 17)])
+    all_nodes = get_nodes_in_queue(queue) 
     # two nodes do not fit the pattern of other node names
     all_nodes.update(['nodegpu002', 'nodegpu003'])
     more_jobs = True
