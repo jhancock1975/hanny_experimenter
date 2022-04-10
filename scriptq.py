@@ -83,15 +83,14 @@ def get_nodes_in_queue(queue: str)->set :
     return all_nodes
     
 if __name__ == '__main__':
-    logger = get_logger(level=logging.DEBUG if args.verbose else logging.INFO)
-    logger.info('staring up')
-
     parser = argparse.ArgumentParser()
     parser.add_argument('-v', '--verbose', dest='verbose', action='store_true',
                         help='turn on debugging output')
     parser.add_argument('queue', help='queue to submit jobs to')
     parser.add_argument('script_file', help='file of commands to run via the sbatch utility') 
     args = parser.parse_args()
+    logger = get_logger(level=logging.DEBUG if args.verbose else logging.INFO)
+    logger.info('staring up')
     logger.info(f'args: {args}')
 
     # node names in Koko are mostly like nodenviv1000
