@@ -78,6 +78,9 @@ def get_nodes_in_queue(queue: str)->set :
         # gpu node in longq7-eng now, so no need for
         # scriptq
         all_nodes = set(['nodeamd025', 'nodeamd027', 'nodeamd029', 'nodeamd030', 'nodeamd031', 'nodeamd032', 'nodeamd033', 'nodeamd034', 'nodeamd036', 'nodeamd037'])
+    elif queue == 'longq7-eng-gpu':
+        # make a pseudo-queue for longq7-eng resources with GPUs
+        all_nodes = set(['nodeamd039'])
     else:
         raise Exception('unknown queue')
     return all_nodes
