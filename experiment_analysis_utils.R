@@ -2,6 +2,8 @@
 ### agricolae for Tukey HSD
 ### xtable for latex format ANOVA table
 pacman::p_load(agricolae, gplots, multcompView, ggplot2, jsonlite, xtable, stringr, stringi, gtools, RJSONIO)
+### global vspace controls space between tables
+vspace <- '-6.25mm'
 
 get_data_for_n_factor_research_question <- function(file_name, factor_funcs,
                                                     factor_names){
@@ -105,7 +107,7 @@ write_hsd_table <- function(aov_clf_metric, agg, metric, label, caption){
     }
     result = paste(result, "\t\\end{tabular}\n")
     result = paste0(result, "\t\\label{tab:", label,  "}\n")
-    result = paste(result, "\\vspace{-10mm}")
+    result = paste(result, "\\vspace{", vspace, "}")
     result = paste(result, "\\end{table}")
     result = paste(result, "\\egroup")
     return(result)
@@ -201,7 +203,8 @@ n_factor_research_question <- function(exp_title, factors, metric, factor_funcs,
     aov_table_str <- print(aov_table, file = "/dev/null", caption.placement = "top")
     aov_table_str <- sub("\\[ht\\]", "[H]", aov_table_str)
     aov_table_str <- sub("\\hline", "\\midrule", aov_table_str)
-    aov_table_str <- sub("\\end\\{table\\}", "\\vspace{-10mm}\n\\end{table}", aov_table_str)
+    aov_table_str <- sub("\\end\\{table\\}",
+                         paste("\\vspace{", vspace, "}\n\\end{table}"), aov_table_str)
     write(aov_table_str, file = output_file_name, append = T)
 
     for (factor in factors){
